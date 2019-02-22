@@ -7,6 +7,7 @@ public enum MapState {
     EMPTY,
     WALL,
     PLAYER,
+	STAIRS,
 }
 
 public class MapInfo {
@@ -29,6 +30,7 @@ public class SceneController : MonoBehaviour
     public GameObject floorPrefab;
     public GameObject floorPrefab2;
     public GameObject playerPrefab;
+	public GameObject stairsPrefab;
 
     public MapInfo[,] mapInfo;
     public int mapWidth = 100;
@@ -56,6 +58,13 @@ public class SceneController : MonoBehaviour
         cameraCtrl.SetPlayerObj(playerObject);
     }
 
+	//
+	//void Update(){
+	//}
+	//
+
+
+
     /// <summary>
     /// マップデータ作成
     /// </summary>
@@ -65,6 +74,7 @@ public class SceneController : MonoBehaviour
         //int[,] map = generator.Generate();
 
         MapGenerator mapGen = new MapGenerator();
+		//0が壁、1が通路、2が部屋のint型二次元配列
         int[,] map = mapGen.GenerateMap(mapWidth, mapHeight, maxRoom);
 
         for (var x = 0; x < mapWidth; x++)
@@ -92,19 +102,48 @@ public class SceneController : MonoBehaviour
 
         while (true)
         {
+			// 横のランダムなindexを取得
             int xPos = Random.Range(0, mapWidth - 1);
+
+			// 縦のランダムなindexを取得
             int zPos = Random.Range(0, mapHeight - 1);
 
+			// そこが空だったら
             if (mapInfo[xPos, zPos].state == MapState.EMPTY)
             {
-                // 該当する座標のマップ情報をプレイヤーにする
+				// 該当する座標のマップ情報をプレイヤーに書き換える
                 mapInfo[xPos, zPos].SetState(MapState.PLAYER);
+
+				// プレイヤーの座標を設定
                 PlayerXpos = xPos;
                 playerZpos = zPos;
+		
                 break;
             }
         }
+
+		while (true)
+		{
+			// 横のランダムなindexを取得
+			int xPos = Random.Range(0, mapWidth - 1);
+
+			// 縦のランダムなindexを取得
+			int zPos = Random.Range(0, mapHeight - 1);
+
+			// そこが空だったら
+			if (mapInfo[xPos, zPos].state == MapState.EMPTY && mapInfo[xPos, zPos].isRoom)
+			{
+				// 該当する座標のマップ情報を階段にに書き換える
+				mapInfo[xPos, zPos].SetState(MapState.STAIRS);
+				break;
+			}
+		}
+
     }
+		
+	/// <summary>
+	/// オブジェクトを生成している
+	/// </summary>
 
     void GenerateObjects()
     {
@@ -118,6 +157,7 @@ public class SceneController : MonoBehaviour
                     GameObject wall = Instantiate(wallPrefab);
                     wall.transform.localPosition = new Vector3(x, 0, z);
                 }
+
                 else if (mapInfo[x, z].state == MapState.PLAYER)
                 {
                     // 該当する座標のマップ情報を通路にする
@@ -125,6 +165,10 @@ public class SceneController : MonoBehaviour
                     playerObject.transform.localPosition = new Vector3(x, 0, z);
                     playerCtrl = playerObject.GetComponent<PlayerController>();
                 }
+				else if (mapInfo[x, z].state == MapState.STAIRS) {
+					GameObject stairs = Instantiate(stairsPrefab);
+					stairs.transform.localPosition = new Vector3(x, 0, z);
+				}
 
                 // 床を生成
                 var tile = Instantiate((mapInfo[x,z].isRoom) ? floorPrefab : floorPrefab2);
@@ -132,4 +176,5 @@ public class SceneController : MonoBehaviour
             }
         }
     }
+		
 }
