@@ -46,9 +46,28 @@ public class PlayerController : MonoBehaviour
             {
                 inMove = false;
                 t = 0;
+
+			//移動が終わったタイミングでチェック
+				ChechOnStairs();
             }
         }
     }
+
+	void ChechOnStairs(){
+		Debug.Log ("ここでチェック");
+
+		// 直ちに移動させる場合だったらSceneControllerの関数を呼び出して、ステージを再生成する。
+		if (sceneCtrl.stairsXpos == sceneCtrl.PlayerXpos && sceneCtrl.stairsZpos == sceneCtrl.playerZpos) {
+			Debug.Log ("Stairs");
+	//		sceneCtrl.SceneController();
+	//	    SceneController();
+
+		}
+		   
+	
+
+	}
+
 
     void MoveUp()
     {
@@ -65,6 +84,8 @@ public class PlayerController : MonoBehaviour
                 inMove = true;
                 fromPos = this.transform.position;
                 toPos = new Vector3(this.transform.position.x, this.transform.position.y, nextZPos);
+
+
             }
         }
     }

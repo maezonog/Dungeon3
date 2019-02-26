@@ -301,8 +301,11 @@ MonoBehaviour:
     type: 2}
   playerPrefab: {fileID: 1904924055113338271, guid: 30ffbc9a384da4e0c899611a26212c6c,
     type: 2}
-  stairsPrefab: {fileID: 1910695704038322, guid: 20128e25e6f7441ff82b9b0267c44ac3,
+  stairsPrefab: {fileID: 1100643923484162, guid: 20128e25e6f7441ff82b9b0267c44ac3,
     type: 2}
+  enemyPrefab: {fileID: 1167905826457740, guid: c401fd2cfa4244367ae98dd8429d50b1,
+    type: 2}
+  itemPrefab: {fileID: 1983034529705998, guid: 9f4dd149cb406479faac271a6f206101, type: 2}
   mapWidth: 100
   mapHeight: 100
   maxRoom: 10

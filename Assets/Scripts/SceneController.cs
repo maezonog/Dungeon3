@@ -7,16 +7,21 @@ public enum MapState {
     EMPTY,
     WALL,
     PLAYER,
-	STAIRS,
+//	STAIRS,
 }
 
 public class MapInfo {
     public MapState state = MapState.EMPTY;
     public bool isRoom = false;
+	public bool isStairs= false;
 
     public void setRoom(bool isRoom) {
         this.isRoom = isRoom;
     }
+
+	public void setStairs(bool isStairs){
+		this.isStairs = isStairs;
+	}
 
     public void SetState(MapState state) {
         this.state = state;
@@ -31,6 +36,8 @@ public class SceneController : MonoBehaviour
     public GameObject floorPrefab2;
     public GameObject playerPrefab;
 	public GameObject stairsPrefab;
+	public GameObject enemyPrefab;
+	public GameObject itemPrefab;
 
     public MapInfo[,] mapInfo;
     public int mapWidth = 100;
@@ -38,6 +45,9 @@ public class SceneController : MonoBehaviour
     public int maxRoom = 10;
     public int PlayerXpos;
     public int playerZpos;
+
+	public int stairsXpos;
+	public int stairsZpos;
 
     private GameObject playerObject;
     private PlayerController playerCtrl;
@@ -117,7 +127,7 @@ public class SceneController : MonoBehaviour
 				// プレイヤーの座標を設定
                 PlayerXpos = xPos;
                 playerZpos = zPos;
-		
+			
                 break;
             }
         }
@@ -134,7 +144,10 @@ public class SceneController : MonoBehaviour
 			if (mapInfo[xPos, zPos].state == MapState.EMPTY && mapInfo[xPos, zPos].isRoom)
 			{
 				// 該当する座標のマップ情報を階段にに書き換える
-				mapInfo[xPos, zPos].SetState(MapState.STAIRS);
+				mapInfo[xPos, zPos].setStairs(true);
+
+				stairsXpos = xPos;
+				stairsZpos = zPos;
 				break;
 			}
 		}
@@ -165,7 +178,9 @@ public class SceneController : MonoBehaviour
                     playerObject.transform.localPosition = new Vector3(x, 0, z);
                     playerCtrl = playerObject.GetComponent<PlayerController>();
                 }
-				else if (mapInfo[x, z].state == MapState.STAIRS) {
+
+				   //階段生成
+				else if (mapInfo[x, z].isStairs) {
 					GameObject stairs = Instantiate(stairsPrefab);
 					stairs.transform.localPosition = new Vector3(x, 0, z);
 				}
