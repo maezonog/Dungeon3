@@ -8,12 +8,17 @@ public enum MapState {
     WALL,
     PLAYER,
 //	STAIRS,
+	ITEM,
+	ENEMY,
+
 }
 
 public class MapInfo {
     public MapState state = MapState.EMPTY;
     public bool isRoom = false;
 	public bool isStairs= false;
+	public bool isItem= false;
+	public bool isEnemy = false;
 
     public void setRoom(bool isRoom) {
         this.isRoom = isRoom;
@@ -21,6 +26,13 @@ public class MapInfo {
 
 	public void setStairs(bool isStairs){
 		this.isStairs = isStairs;
+	}
+
+	public void setItem(bool isItem){
+		this.isItem = isItem;
+	}
+	public void setEnemy(bool isEnemy){
+		this.isEnemy = isEnemy;
 	}
 
     public void SetState(MapState state) {
@@ -43,14 +55,26 @@ public class SceneController : MonoBehaviour
     public int mapWidth = 100;
     public int mapHeight = 100;
     public int maxRoom = 10;
+
     public int PlayerXpos;
     public int playerZpos;
 
 	public int stairsXpos;
 	public int stairsZpos;
 
+	public int itemXpos;
+	public int itemZpos;
+
+	public int enemyXpos;
+	public int enemyZpos;
+
     private GameObject playerObject;
+	private GameObject stairs;
+	private GameObject item;
+	private GameObject enemy;
     private PlayerController playerCtrl;
+
+	private List<GameObject> objects = new List<GameObject> ();
 
     void Start()
     {
@@ -152,6 +176,46 @@ public class SceneController : MonoBehaviour
 			}
 		}
 
+		while (true)
+		{
+			// 横のランダムなindexを取得
+			int xPos = Random.Range(0, mapWidth - 1);
+
+			// 縦のランダムなindexを取得
+			int zPos = Random.Range(0, mapHeight - 1);
+
+			// そこが空だったら
+			if (mapInfo[xPos, zPos].state == MapState.EMPTY && mapInfo[xPos, zPos].isRoom)
+			{
+				// 該当する座標のマップ情報をアイテムにに書き換える
+				mapInfo[xPos, zPos].setItem(true);
+
+				itemXpos = xPos;
+				itemZpos = zPos;
+				break;
+			}
+		}
+
+		while (true)
+		{
+			// 横のランダムなindexを取得
+			int xPos = Random.Range(0, mapWidth - 1);
+
+			// 縦のランダムなindexを取得
+			int zPos = Random.Range(0, mapHeight - 1);
+
+			// そこが空だったら
+			if (mapInfo[xPos, zPos].state == MapState.EMPTY && mapInfo[xPos, zPos].isRoom)
+			{
+				// 該当する座標のマップ情報を敵にに書き換える
+				mapInfo[xPos, zPos].setEnemy(true);
+
+				enemyXpos = xPos;
+				enemyZpos = zPos;
+				break;
+			}
+		}
+
     }
 		
 	/// <summary>
@@ -169,6 +233,7 @@ public class SceneController : MonoBehaviour
                     // 壁の場合は壁のキューブを生成
                     GameObject wall = Instantiate(wallPrefab);
                     wall.transform.localPosition = new Vector3(x, 0, z);
+					this.objects.Add (wall);
                 }
 
                 else if (mapInfo[x, z].state == MapState.PLAYER)
@@ -181,15 +246,94 @@ public class SceneController : MonoBehaviour
 
 				   //階段生成
 				else if (mapInfo[x, z].isStairs) {
-					GameObject stairs = Instantiate(stairsPrefab);
+					
+					stairs = Instantiate(stairsPrefab);
 					stairs.transform.localPosition = new Vector3(x, 0, z);
+				}
+
+				//アイテム生成
+				else if (mapInfo[x, z].isItem) {
+
+					item = Instantiate(itemPrefab);
+					item.transform.localPosition = new Vector3(x, 0, z);
+				}
+
+				//敵生成
+				else if (mapInfo[x, z].isEnemy) {
+
+					enemy = Instantiate(enemyPrefab);
+					enemy.transform.localPosition = new Vector3(x, 0, z);
 				}
 
                 // 床を生成
                 var tile = Instantiate((mapInfo[x,z].isRoom) ? floorPrefab : floorPrefab2);
                 tile.transform.localPosition = new Vector3(x, -1, z);
+				this.objects.Add (tile);
             }
         }
     }
+
+	public void RegenerateMap() {
+		// まップデータの再生成
+		// マップ情報の２次元配列を作成。
+		// 壁、プレイヤー、敵、階段など該当する座標がどのような情報かを格納しておく為の変数。
+		mapInfo = new MapInfo[mapWidth, mapHeight];
+
+		// マップの情報を生成する
+		GenerateMapData();
+
+		// 床と壁を全て削除
+		for (int i = 0; i < this.objects.Count; i++) {
+			Destroy(this.objects[i]);
+				}
+
+		this.objects.Clear ();
+		
+		// マップをもう一度生成、階段、プレイヤーは座標だけ移動
+		// 座標の変更
+		for(var x= 0; x<mapWidth; x++)
+		{
+			for (var z = 0; z < mapHeight; z++)
+			{
+
+				if (mapInfo [x, z].state == MapState.WALL) {
+					// 壁の場合は壁のキューブを生成
+					GameObject wall = Instantiate (wallPrefab);
+					wall.transform.localPosition = new Vector3 (x, 0, z);
+					this.objects.Add (wall);
+
+				} else if (mapInfo [x, z].state == MapState.PLAYER) {
+					// 該当する座標のマップ情報を通路にする
+					playerObject.transform.localPosition = new Vector3 (x, 0, z);
+				}
+
+				//階段生成
+				else if (mapInfo [x, z].isStairs) {
+					stairs.transform.localPosition = new Vector3 (x, 0, z);
+				}
+
+				//アイテム生成
+				else if (mapInfo [x, z].isItem) {
+					item.transform.localPosition = new Vector3 (x, 0, z);
+				}
+
+				//敵生成
+				else if (mapInfo[x,z].isEnemy){
+					enemy.transform.localPosition = new Vector3 (x, 0, z);
+				}
+
+				// 床を生成
+				var tile= Instantiate((mapInfo[x,z].isRoom)?floorPrefab:floorPrefab2);
+				tile.transform.localPosition = new Vector3 (x, -1, z);
+				this.objects.Add (tile);
+			}
+		}
+	}
+
+	public void DeleteItem(){
+		Debug.Log ("GET");
+		Destroy (itemPrefab);
+	}
+		
 		
 }

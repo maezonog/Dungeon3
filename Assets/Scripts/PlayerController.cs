@@ -14,6 +14,9 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         sceneCtrl = GameObject.Find("SceneController").GetComponent<SceneController>();
+		//GameObject obj = GameObject.Find ("SceneController"); 
+		//SceneControllerをオブジェクトの名前から取得して変数に格納する
+		//SceneController script = sceneCtrl.GetComponent<SceneController>();
     }
 
     void Update()
@@ -49,6 +52,9 @@ public class PlayerController : MonoBehaviour
 
 			//移動が終わったタイミングでチェック
 				ChechOnStairs();
+				ItemEncount();
+				EnemyEncount();
+
             }
         }
     }
@@ -59,14 +65,26 @@ public class PlayerController : MonoBehaviour
 		// 直ちに移動させる場合だったらSceneControllerの関数を呼び出して、ステージを再生成する。
 		if (sceneCtrl.stairsXpos == sceneCtrl.PlayerXpos && sceneCtrl.stairsZpos == sceneCtrl.playerZpos) {
 			Debug.Log ("Stairs");
-	//		sceneCtrl.SceneController();
-	//	    SceneController();
+			sceneCtrl.RegenerateMap ();
+
 
 		}
-		   
-	
-
 	}
+
+	void ItemEncount(){
+		if (sceneCtrl.itemXpos == sceneCtrl.PlayerXpos && sceneCtrl.itemZpos == sceneCtrl.playerZpos) {
+			Debug.Log ("Item");
+			sceneCtrl.DeleteItem();
+		}
+	}
+
+	void EnemyEncount(){
+		if (sceneCtrl.enemyXpos == sceneCtrl.PlayerXpos && sceneCtrl.enemyZpos == sceneCtrl.playerZpos) {
+			Debug.Log ("Enemy");
+		
+		}
+	}
+
 
 
     void MoveUp()
